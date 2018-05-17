@@ -21,20 +21,27 @@ namespace htcpcp_net.Model
         public string Name { get; set; }
     }
 
+    public enum RequestType
+    {
+        Start,
+        Stop
+    }
+
     public class BrewingRequestEventArgs : EventArgs
     {
         public const string ACCEPT_ADDITIONS_HEADER_NAME = "accept-additions";
 
-        public string Scheme { get; set; }
-        public int PotNumber { get; set; }
-        public ICollection<Addition> Additions { get; set; }
+        public string Scheme { get; private set; }
+        public int PotNumber { get; private set; }
+        public ICollection<Addition> Additions { get; private set; }
+        public RequestType RequestType { get; private set; }
 
         internal BrewingRequestEventArgs(CommunicationState state)
         {
             Scheme = state.Uri.Scheme;
-
-
-
+            PotNumber = Convert.ToInt32(state.Uri.Segments[1]);
+            RequestType = (RequestType)Enum.Parse(typeof(RequestType), state.Body, true);
+            
             ParseAdditions(state);
         }
 

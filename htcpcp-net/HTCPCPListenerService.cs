@@ -72,21 +72,27 @@ namespace htcpcp_net
                         var line = reader.ReadLine()?.Trim().ToLower() ?? "";
                         var output = ProcessCommand(line, state);
 
-                        Console.WriteLine($"Input: {line}");
-
                         if (!string.IsNullOrEmpty(output))
                         {
-                            Console.WriteLine($"Output: {output}");
-                            writer.WriteLine(output);
-                            writer.Flush();
+                            try
+                            {
+                                writer.WriteLine(output);
+                                writer.Flush();
+                            }
+                            catch { }
                         }
-
-                        Console.WriteLine($"Stage: {state.Stage}");
 
                         if (!state.IsValid || state.Stage == Stage.Complete)
                         {
-                            if(!state.IsValid)
-                                Console.WriteLine($"State is invalid.. closing");
+                            if (state.IsValid)
+                            {
+                                try
+                                {
+                                    writer.WriteLine(OK_RESPONSE);
+                                    writer.Flush();
+                                }
+                                catch { }
+                            }
 
                             client.Close();
                         }
@@ -98,10 +104,6 @@ namespace htcpcp_net
             if (state.Stage == Stage.Complete)
             {
                 BrewingRequestRecieved(this, new BrewingRequestEventArgs(state));
-            }
-            else
-            {
-                Console.WriteLine("Connection closed before complete request");
             }
         }
 
@@ -123,7 +125,7 @@ namespace htcpcp_net
                     }
 
                     var parts = line.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                    if (!Uri.TryCreate(parts[1], UriKind.Absolute, out Uri uri))
+                    if (!Uri.TryCreate(parts[1], UriKind.Absolute, out Uri uri) || uri.Segments.Length != 2)
                     {
                         state.IsValid = false;
                         return BAD_REQUEST_RESPONSE;
@@ -143,7 +145,7 @@ namespace htcpcp_net
                             .Select(x => x.Trim())
                             .ToArray();
 
-                        if(headerParts.Length != 2)
+                        if (headerParts.Length != 2)
                         {
                             state.IsValid = false;
                             return BAD_REQUEST_RESPONSE;
@@ -165,9 +167,18 @@ namespace htcpcp_net
                     }
                     break;
                 case Stage.Body:
-                    if (string.IsNullOrEmpty(line))
+                    if (string.IsNullOrEmpty(line) && !string.IsNullOrEmpty(state.Body))
                     {
                         state.Stage = Stage.Complete;
+                    }
+                    else if(line == "start" || line == "stop")
+                    {
+                        state.Body = line;
+                    }
+                    else
+                    {
+                        state.IsValid = false;
+                        return BAD_REQUEST_RESPONSE;
                     }
 
                     break;

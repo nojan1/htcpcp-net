@@ -15,12 +15,17 @@ namespace TestApp
 
         private static void Service_BrewingRequestRecieved(object sender, htcpcp_net.Model.BrewingRequestEventArgs e)
         {
-            Console.WriteLine("Main program: Got brewing request");
+            Console.WriteLine($"Main program: Got brewing request for pot {e.PotNumber}");
+            Console.WriteLine($"  Action: {e.RequestType}");
 
+            Console.WriteLine("\nRequested additions:");
+            Console.WriteLine("------------------------");
             foreach(var addition in e.Additions)
             {
-                Console.WriteLine($"{addition.Type}: {addition.Name}");
+                Console.WriteLine($"  {addition.Type} => {addition.Name}");
             }
+
+            Console.WriteLine("");
         }
     }
 }

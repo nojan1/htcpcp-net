@@ -26,5 +26,6 @@ namespace htcpcp_net.Model
         public Method Method { get; set; }
         public Stage Stage { get; set; }
         public Dictionary<string, List<string>> KeyValues { get; private set; } = new Dictionary<string, List<string>>();
+        public string Body { get; set; }
     }
 }
