@@ -16,6 +16,11 @@ namespace TestApp
         private static void Service_BrewingRequestRecieved(object sender, htcpcp_net.Model.BrewingRequestEventArgs e)
         {
             Console.WriteLine("Main program: Got brewing request");
+
+            foreach(var addition in e.Additions)
+            {
+                Console.WriteLine($"{addition.Type}: {addition.Name}");
+            }
         }
     }
 }

@@ -139,28 +139,28 @@ namespace htcpcp_net
                     }
                     else
                     {
-                        var header = line.Split(new char[] { ':' }, 2)
+                        var headerParts = line.Split(new char[] { ':' }, 2)
                             .Select(x => x.Trim())
                             .ToArray();
 
-                        if(header.Length != 2)
+                        if(headerParts.Length != 2)
                         {
                             state.IsValid = false;
                             return BAD_REQUEST_RESPONSE;
                         }
 
-                        var headerValues = header[1]
+                        var headerValues = headerParts[1]
                             .Split(',')
                             .Select(s => s.Trim())
                             .ToList();
 
-                        if (state.KeyValues.ContainsKey(header[0]))
+                        if (state.KeyValues.ContainsKey(headerParts[0]))
                         {
-                            state.KeyValues[header[0]].AddRange(headerValues);
+                            state.KeyValues[headerParts[0]].AddRange(headerValues);
                         }
                         else
                         {
-                            state.KeyValues[header[0]] = headerValues;
+                            state.KeyValues[headerParts[0]] = headerValues;
                         }
                     }
                     break;
